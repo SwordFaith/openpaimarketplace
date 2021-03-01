@@ -74,7 +74,7 @@ const createStorageBlobs = async models => {
 };
 
 const init = async models => {
-  await models.sequelize.sync();
+  await models.sequelize.sync({ alter: true });
   await createTemplates(models);
   await createStorageBlobs(models);
 };

@@ -73,8 +73,12 @@ const createStorageBlobs = async models => {
   }
 };
 
-const init = async models => {
+const sync = async models => {
   await models.sequelize.sync({ alter: true });
+};
+
+const init = async models => {
+  await sync(models);
   await createTemplates(models);
   await createStorageBlobs(models);
 };
@@ -88,7 +92,12 @@ const modelSyncHandler = fn => {
         // Error 42P01: relation(target table) does not exist
         await init(args[args.length - 1]);
         return await fn(...args.slice(0, args.length - 1));
+      } else if (get(error, 'original.code') === '42703') {
+        // Error 42703: colomn does not exist
+        await sync(args[args.length - 1]);
+        return await fn(...args.slice(0, args.length - 1));
       } else {
+        console.log(get(error, 'original.code'));
         throw error;
       }
     }
